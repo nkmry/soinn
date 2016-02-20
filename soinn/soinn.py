@@ -20,8 +20,8 @@ class Soinn(object):
         self.max_edge_age = max_edge_age
         self.min_degree = 1
         self.num_signal = 0
-        self.nodes = np.array()
-        self.winning_times = np.array()
+        self.nodes = np.array([])
+        self.winning_times = np.array([])
         self.adjacent_mat = coo_matrix((0, 0))
 
     def input_signal(self, signal):
