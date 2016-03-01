@@ -30,7 +30,7 @@ class Soinn(object):
         Args:
             signal: A new signal
         """
-        signal = self.__check_signal(signal)
+        self.__check_signal(signal)
         self.num_signal += 1
 
         if self.nodes.shape[0] < 3:
@@ -52,7 +52,19 @@ class Soinn(object):
             self.__delete_noise_nodes()
 
     def __check_signal(self, signal):
-        pass
+        """ check type and dimensionality of an input signal.
+        If signal is the first input signal, set the dimension of it as self.dim
+        :param signal: an input signal
+        """
+        if not(isinstance(signal, np.ndarray)):
+            raise TypeError()
+        if len(signal.shape) != 1:
+            raise TypeError()
+        if not(hasattr(self, 'dim')):
+            self.dim = signal.shape[0]
+        else:
+            if signal.shape[0] != self.dim:
+                raise TypeError()
 
     def __add_node(self, signal):
         pass
