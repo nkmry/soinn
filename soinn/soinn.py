@@ -4,17 +4,17 @@ from scipy.sparse import lil_matrix
 
 
 class Soinn(object):
-    """ Self-Organizing Incremental Neural Network
+    """ Self-Organizing Incremental Neural Network (SOINN)
 
     """
 
     def __init__(self, delete_node_period=300, max_edge_age=50):
         """
-        Args:
-            delete_node_period (int): A period deleting nodes.
+        :param delete_node_period: A period deleting nodes.
                 The nodes that doesn't satisfy some condition are deleted every this period.
-            max_edge_age (int): The maximum of edges' ages.
+        :param max_edge_age: The maximum of edges' ages.
                 If an edge's age is more than this, the edge is deleted.
+        :return:
         """
         self.delete_node_period = delete_node_period
         self.max_edge_age = max_edge_age
@@ -24,11 +24,10 @@ class Soinn(object):
         self.winning_times = np.array([])
         self.adjacent_mat = coo_matrix((0, 0))
 
-    def input_signal(self, signal):
+    def input_signal(self, signal: np.ndarray):
         """ Input a new signal to SOINN
-
-        Args:
-            signal: A new signal
+        :param signal: A new input signal
+        :return:
         """
         self.__check_signal(signal)
         self.num_signal += 1
@@ -51,7 +50,7 @@ class Soinn(object):
         if self.num_signal % self.delete_node_period == 0:
             self.__delete_noise_nodes()
 
-    def __check_signal(self, signal):
+    def __check_signal(self, signal: np.ndarray):
         """ check type and dimensionality of an input signal.
         If signal is the first input signal, set the dimension of it as self.dim
         :param signal: an input signal
