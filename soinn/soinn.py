@@ -80,7 +80,8 @@ class Soinn(object):
         pass
 
     def __add_edge(self, node_indexes):
-        pass
+        self.adjacent_mat[node_indexes[0], node_indexes[1]] = 1
+        self.adjacent_mat[node_indexes[1], node_indexes[0]] = 1
 
     def __increment_edge_ages(self, winner_index):
         pass

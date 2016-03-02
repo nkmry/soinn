@@ -25,9 +25,9 @@ class TestSoinn(unittest.TestCase):
 
     def test_add_node(self):
         self.soinn.dim = 2  # dim have to be set before calling __add_node()
-        signal_array = [[0, 0], [1, 0], [1, 1], [0, 1]]
-        for n in range(len(signal_array)):
-            signal = np.array(signal_array[n])
+        signals = np.random.random((4, 2))
+        for n in range(signals.shape[0]):
+            signal = signals[n, :]
             self.soinn._Soinn__add_node(signal)
             self.assertEqual(len(self.soinn.winning_times), n + 1)
             self.assertEqual(self.soinn.nodes.shape, (n + 1, self.soinn.dim))
@@ -35,6 +35,14 @@ class TestSoinn(unittest.TestCase):
                 self.assertEqual(self.soinn.nodes[n, i], signal[i], '[' + str(n) + ', ' + str(i) + ']')
             self.assertEqual(self.soinn.adjacent_mat.shape, (n + 1, n + 1))
             self.assertEqual(self.soinn.adjacent_mat.nnz, 0)
+
+    def test_add_edge(self):
+        self.soinn.nodes = np.array([[0, 0], [1, 0], [1, 1], [0, 1]])
+        self.soinn.adjacent_mat = dok_matrix((4, 4))
+        s1, s2 = 1, 2
+        self.soinn._Soinn__add_edge((s1, s2))
+        self.assertEqual(self.soinn.adjacent_mat.nnz, 2)
+        self.assertEqual(self.soinn.adjacent_mat[s1, s2], 1)
 
 if __name__ == '__main__':
     unittest.main()
