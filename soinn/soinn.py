@@ -19,9 +19,9 @@ class Soinn(object):
         self.max_edge_age = max_edge_age
         self.min_degree = 1
         self.num_signal = 0
-        self.nodes = np.array([])
+        self.nodes = np.array([], dtype=np.float64)
         self.winning_times = []
-        self.adjacent_mat = dok_matrix((0, 0))
+        self.adjacent_mat = dok_matrix((0, 0), dtype=np.float64)
 
     def input_signal(self, signal: np.ndarray):
         """ Input a new signal to SOINN
@@ -35,7 +35,7 @@ class Soinn(object):
             self.__add_node(signal)
             return
 
-        [winner, dists] = self.__find_nearest_nodes(2, signal)
+        winner, dists = self.__find_nearest_nodes(2, signal)
         sim_thresholds = self.__calculate_similarity_thresholds(winner)
         if dists[0] > sim_thresholds[0] and dists[1] > sim_thresholds[1]:
             self.__add_node(signal)
@@ -65,16 +65,23 @@ class Soinn(object):
             if signal.shape[0] != self.dim:
                 raise TypeError()
 
-    def __add_node(self, signal):
+    def __add_node(self, signal: np.ndarray):
         n = self.nodes.shape[0]
         self.nodes.resize((n + 1, self.dim))
         self.nodes[-1, :] = signal
         self.winning_times.append(1)
         self.adjacent_mat.resize((n + 1, n + 1))
 
-
-    def __find_nearest_nodes(self, num, signal):
-        pass
+    def __find_nearest_nodes(self, num: int, signal: np.ndarray):
+        n = self.nodes.shape[0]
+        indexes = [0.0] * num
+        sq_dists = [0.0] * num
+        D = np.sum((self.nodes - np.stack([signal for i in range(n)], 0))**2, 1)
+        for i in range(num):
+            indexes[i] = np.nanargmin(D)
+            sq_dists[i] = D[indexes[i]]
+            D[indexes[i]] = float('nan')
+        return indexes, sq_dists
 
     def __calculate_similarity_thresholds(self, node_index):
         pass

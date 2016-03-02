@@ -1,5 +1,6 @@
 import unittest
 import numpy as np
+from scipy.sparse import dok_matrix
 from soinn import Soinn
 
 
@@ -43,6 +44,16 @@ class TestSoinn(unittest.TestCase):
         self.soinn._Soinn__add_edge((s1, s2))
         self.assertEqual(self.soinn.adjacent_mat.nnz, 2)
         self.assertEqual(self.soinn.adjacent_mat[s1, s2], 1)
+
+    def test_find_nearest_nodes(self):
+        self.soinn.nodes = np.array([[0, 0], [1, 0], [1, 1], [0, 1]], dtype=np.float64)
+        signal = np.array([-1, 0])
+        indexes, sq_dists = self.soinn._Soinn__find_nearest_nodes(1, signal)
+        self.assertEqual(indexes, [0])
+        self.assertEqual(sq_dists, [1])
+        indexes, sq_dists = self.soinn._Soinn__find_nearest_nodes(2, signal)
+        self.assertEqual(indexes, [0, 3])
+        self.assertEqual(sq_dists, [1, 2])
 
 if __name__ == '__main__':
     unittest.main()
