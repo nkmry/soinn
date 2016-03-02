@@ -91,7 +91,9 @@ class Soinn(object):
         self.adjacent_mat[node_indexes[1], node_indexes[0]] = 1
 
     def __increment_edge_ages(self, winner_index):
-        pass
+        for k, v in self.adjacent_mat[winner_index, :].items():
+            self.adjacent_mat[winner_index, k[1]] += 1
+            self.adjacent_mat[k[1], winner_index] += 1
 
     def __delete_old_edges(self, winner_index):
         pass
