@@ -1,6 +1,5 @@
 import numpy as np
-from scipy.sparse import coo_matrix
-from scipy.sparse import lil_matrix
+from scipy.sparse import dok_matrix
 
 
 class Soinn(object):
@@ -21,8 +20,8 @@ class Soinn(object):
         self.min_degree = 1
         self.num_signal = 0
         self.nodes = np.array([])
-        self.winning_times = np.array([])
-        self.adjacent_mat = coo_matrix((0, 0))
+        self.winning_times = []
+        self.adjacent_mat = dok_matrix((0, 0))
 
     def input_signal(self, signal: np.ndarray):
         """ Input a new signal to SOINN
@@ -52,7 +51,8 @@ class Soinn(object):
 
     def __check_signal(self, signal: np.ndarray):
         """ check type and dimensionality of an input signal.
-        If signal is the first input signal, set the dimension of it as self.dim
+        If signal is the first input signal, set the dimension of it as self.dim.
+        So, this method have to be called before calling functions that use self.dim.
         :param signal: an input signal
         """
         if not(isinstance(signal, np.ndarray)):
@@ -66,7 +66,12 @@ class Soinn(object):
                 raise TypeError()
 
     def __add_node(self, signal):
-        pass
+        n = self.nodes.shape[0]
+        self.nodes.resize((n + 1, self.dim))
+        self.nodes[-1, :] = signal
+        self.winning_times.append(1)
+        self.adjacent_mat.resize((n + 1, n + 1))
+
 
     def __find_nearest_nodes(self, num, signal):
         pass
