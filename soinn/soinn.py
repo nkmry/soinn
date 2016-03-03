@@ -42,7 +42,7 @@ class Soinn(object):
         else:
             self.__add_edge(winner)
             self.__increment_edge_ages(winner[1])
-            self.__delete_old_edges(winner[1])
+            winner[1] = self.__delete_old_edges(winner[1])
             self.__update_winner(winner[1], signal)
             self.__update_adjacent_nodes(winner[1], signal)
 
@@ -104,6 +104,8 @@ class Soinn(object):
             if len(self.adjacent_mat[i, :]) == 0:
                 delete_indexes.append(i)
         self.__delete_nodes(delete_indexes)
+        delete_count = sum([1 if i < winner_index else 0 for i in delete_indexes])
+        return winner_index - delete_count
 
     def __set_edge_weight(self, index, weight):
         self.adjacent_mat[index[0], index[1]] = weight
@@ -121,7 +123,6 @@ class Soinn(object):
         remained_indexes = list(set([i for i in range(n)]) - set(indexes))
         self.winning_times = [self.winning_times[i] for i in remained_indexes]
         self.adjacent_mat = self.adjacent_mat[np.ix_(remained_indexes, remained_indexes)]
-
 
     def __delete_noise_nodes(self, delete_noise_nodes):
         pass

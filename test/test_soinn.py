@@ -97,6 +97,16 @@ class TestSoinn(unittest.TestCase):
         np.testing.assert_array_equal(actual, expected)
         self.assertEqual(self.soinn.winning_times, [0, 2])
 
+    def test_delete_old_edges_with_changing_winner_index(self):
+        # the winner index is changed by deleting nodes
+        self.soinn.winning_times = [i for i in range(4)]
+        expected = self.soinn.nodes[3, :]
+        m = self.soinn.max_edge_age
+        self.soinn.adjacent_mat[[3, 0, 3, 2], [0, 3, 2, 3]] = m + 2
+        self.soinn.adjacent_mat[[3, 1], [1, 3]] = m + 1
+        winner_index = self.soinn._Soinn__delete_old_edges(3)
+        np.testing.assert_array_equal(self.soinn.nodes[winner_index, :], expected)
+
     def test_delete_nodes(self):
         self.soinn.winning_times = [i for i in range(4)]
         self.soinn.adjacent_mat[[0, 1], [1, 0]] = 1
