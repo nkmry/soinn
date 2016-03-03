@@ -57,6 +57,19 @@ class TestSoinn(unittest.TestCase):
         expected = dok_matrix([[0, 3, 2, 0], [3, 0, 0, 0], [2, 0, 0, 0], [0, 0, 0, 0]])
         np.testing.assert_array_equal(self.soinn.adjacent_mat.toarray(), expected.toarray())
 
+    def test_delete_old_edges(self):
+        self.soinn.winning_times = [i for i in range(4)]
+        m = self.soinn.max_edge_age
+        self.soinn.adjacent_mat[[0, 1], [1, 0]] = m + 2
+        self.soinn.adjacent_mat[[0, 2], [2, 0]] = m + 1
+        self.soinn._Soinn__delete_old_edges(0)
+        actual = self.soinn.adjacent_mat.toarray()
+        expected = dok_matrix([[0, m+1, 0], [m+1, 0, 0], [0, 0, 0]]).toarray()
+        np.testing.assert_array_equal(actual, expected)
+        expected = np.array([[0, 0], [1, 1], [0, 1]], dtype=np.float64)
+        np.testing.assert_array_equal(self.soinn.nodes, expected)
+        self.assertEqual(self.soinn.winning_times, [0, 2, 3])
+
     def test_delete_nodes(self):
         self.soinn.winning_times = [i for i in range(4)]
         self.soinn.adjacent_mat[[0, 1], [1, 0]] = 1

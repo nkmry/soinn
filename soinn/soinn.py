@@ -87,16 +87,27 @@ class Soinn(object):
         pass
 
     def __add_edge(self, node_indexes):
-        self.adjacent_mat[node_indexes[0], node_indexes[1]] = 1
-        self.adjacent_mat[node_indexes[1], node_indexes[0]] = 1
+        self.__set_edge_weight(node_indexes, 1)
 
     def __increment_edge_ages(self, winner_index):
         for k, v in self.adjacent_mat[winner_index, :].items():
-            self.adjacent_mat[winner_index, k[1]] += 1
-            self.adjacent_mat[k[1], winner_index] += 1
+            self.__set_edge_weight((winner_index, k[1]), v + 1)
 
     def __delete_old_edges(self, winner_index):
-        pass
+        candidates = []
+        for k, v in self.adjacent_mat[winner_index, :].items():
+            if v > self.max_edge_age + 1:
+                candidates.append(k[1])
+                self.__set_edge_weight((winner_index, k[1]), 0)
+        delete_indexes = []
+        for i in candidates:
+            if len(self.adjacent_mat[i, :]) == 0:
+                delete_indexes.append(i)
+        self.__delete_nodes(delete_indexes)
+
+    def __set_edge_weight(self, index, weight):
+        self.adjacent_mat[index[0], index[1]] = weight
+        self.adjacent_mat[index[1], index[0]] = weight
 
     def __update_winner(self, winner_index, signal):
         pass
