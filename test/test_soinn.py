@@ -57,6 +57,17 @@ class TestSoinn(unittest.TestCase):
         expected = dok_matrix([[0, 3, 2, 0], [3, 0, 0, 0], [2, 0, 0, 0], [0, 0, 0, 0]])
         np.testing.assert_array_equal(self.soinn.adjacent_mat.toarray(), expected.toarray())
 
+    def test_delete_nodes(self):
+        self.soinn.winning_times = [i for i in range(4)]
+        self.soinn.adjacent_mat[[0, 1], [1, 0]] = 1
+        self.soinn.adjacent_mat[[2, 3], [3, 2]] = 2
+        self.soinn._Soinn__delete_nodes([1])
+        expected = np.array([[0, 0], [1, 1], [0, 1]], dtype=np.float64)
+        np.testing.assert_array_equal(self.soinn.nodes, expected)
+        self.assertEqual(self.soinn.winning_times, [0, 2, 3])
+        expected = dok_matrix([[0, 0, 0], [0, 0, 2], [0, 2, 0]]).toarray()
+        np.testing.assert_array_equal(self.soinn.adjacent_mat.toarray(), expected)
+
     def test_find_nearest_nodes(self):
         signal = np.array([-1, 0])
         indexes, sq_dists = self.soinn._Soinn__find_nearest_nodes(1, signal)

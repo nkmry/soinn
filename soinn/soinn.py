@@ -104,5 +104,13 @@ class Soinn(object):
     def __update_adjacent_nodes(self, winner_index, signal):
         pass
 
+    def __delete_nodes(self, indexes):
+        n = len(self.winning_times)
+        self.nodes = np.delete(self.nodes, indexes, 0)
+        remained_indexes = list(set([i for i in range(n)]) - set(indexes))
+        self.winning_times = [self.winning_times[i] for i in remained_indexes]
+        self.adjacent_mat = self.adjacent_mat[np.ix_(remained_indexes, remained_indexes)]
+
+
     def __delete_noise_nodes(self, delete_noise_nodes):
         pass
