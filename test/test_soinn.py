@@ -70,6 +70,33 @@ class TestSoinn(unittest.TestCase):
         np.testing.assert_array_equal(self.soinn.nodes, expected)
         self.assertEqual(self.soinn.winning_times, [0, 2, 3])
 
+    def test_delete_old_edges_with_deleting_no_node(self):
+        # No node is deleted by the function
+        self.soinn.winning_times = [i for i in range(4)]
+        m = self.soinn.max_edge_age
+        self.soinn.adjacent_mat[[0, 1], [1, 0]] = m + 2
+        self.soinn.adjacent_mat[[1, 2], [2, 1]] = 1
+        previous_nodes = self.soinn.nodes
+        previous_winning_times = self.soinn.winning_times
+        self.soinn._Soinn__delete_old_edges(0)
+        actual = self.soinn.adjacent_mat.toarray()
+        expected = dok_matrix([[0, 0, 0, 0], [0, 0, 1, 0], [0, 1, 0, 0], [0, 0, 0, 0]]).toarray()
+        np.testing.assert_array_equal(actual, expected)
+        np.testing.assert_array_equal(self.soinn.nodes, previous_nodes)
+        self.assertEqual(self.soinn.winning_times, previous_winning_times)
+
+    def test_delete_old_edges_with_deleting_several_nodes(self):
+        # delete several nodes simultaneously
+        self.soinn.winning_times = [i for i in range(4)]
+        m = self.soinn.max_edge_age
+        self.soinn.adjacent_mat[[0, 1, 0, 3], [1, 0, 3, 0]] = m + 2
+        self.soinn.adjacent_mat[[0, 2], [2, 0]] = m + 1
+        self.soinn._Soinn__delete_old_edges(0)
+        actual = self.soinn.adjacent_mat.toarray()
+        expected = dok_matrix([[0, m+1], [m+1, 0]]).toarray()
+        np.testing.assert_array_equal(actual, expected)
+        self.assertEqual(self.soinn.winning_times, [0, 2])
+
     def test_delete_nodes(self):
         self.soinn.winning_times = [i for i in range(4)]
         self.soinn.adjacent_mat[[0, 1], [1, 0]] = 1
@@ -81,7 +108,7 @@ class TestSoinn(unittest.TestCase):
         expected = dok_matrix([[0, 0, 0], [0, 0, 2], [0, 2, 0]]).toarray()
         np.testing.assert_array_equal(self.soinn.adjacent_mat.toarray(), expected)
 
-    def test_delete_nodes_2(self):
+    def test_delete_nodes_with_deleting_several_nodes(self):
         # delete several nodes simultaneously
         self.soinn.winning_times = [i for i in range(4)]
         self.soinn.adjacent_mat[[0, 1], [1, 0]] = 1
