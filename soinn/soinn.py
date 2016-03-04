@@ -1,10 +1,14 @@
+# Copyright (c) 2016 Yoshihiro Nakamura
+# This software is released under the MIT License.
+# http://opensource.org/licenses/mit-license.php
+
 import numpy as np
 from scipy.sparse import dok_matrix
 
 
 class Soinn(object):
     """ Self-Organizing Incremental Neural Network (SOINN)
-
+        Ver. 0.1.0
     """
 
     def __init__(self, delete_node_period=300, max_edge_age=50):
