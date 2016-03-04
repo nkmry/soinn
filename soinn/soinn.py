@@ -142,5 +142,10 @@ class Soinn(object):
         self.winning_times = [self.winning_times[i] for i in remained_indexes]
         self.adjacent_mat = self.adjacent_mat[np.ix_(remained_indexes, remained_indexes)]
 
-    def __delete_noise_nodes(self, delete_noise_nodes):
-        pass
+    def __delete_noise_nodes(self):
+        n = len(self.winning_times)
+        noise_indexes = []
+        for i in range(n):
+            if len(self.adjacent_mat[i, :]) < self.min_degree:
+                noise_indexes.append(i)
+        self.__delete_nodes(noise_indexes)
