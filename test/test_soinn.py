@@ -48,8 +48,8 @@ class TestSoinn(unittest.TestCase):
         self.assertEqual(self.soinn.adjacent_mat[s1, s2], 1)
 
     def test_increment_edge_ages(self):
-        self.soinn.adjacent_mat[0, 1:3:1] = 1
-        self.soinn.adjacent_mat[1:3:1, 0] = 1
+        self.soinn.adjacent_mat[0, 1:3] = 1
+        self.soinn.adjacent_mat[1:3, 0] = 1
         self.soinn._Soinn__increment_edge_ages(0)
         expected = dok_matrix([[0, 2, 2, 0], [2, 0, 0, 0], [2, 0, 0, 0], [0, 0, 0, 0]])
         np.testing.assert_array_equal(self.soinn.adjacent_mat.toarray(), expected.toarray())
@@ -156,6 +156,17 @@ class TestSoinn(unittest.TestCase):
         self.soinn._Soinn__update_winner(1, np.array([2, 0], dtype=np.float64))
         np.testing.assert_array_equal(self.soinn.nodes[1, :], [1 + 1/3, 0])
         self.assertEqual(self.soinn.winning_times[1], 3)
+
+    def test_update_adjacent_nodes(self):
+        self.soinn.adjacent_mat[0, 1:3] = 1
+        self.soinn.adjacent_mat[1:3, 0] = 1
+        np.testing.assert_array_equal(self.soinn.nodes[1], [1, 0])
+        np.testing.assert_array_equal(self.soinn.nodes[2], [1, 1])
+        self.soinn._Soinn__update_adjacent_nodes(0, np.array([-1, 0]))
+        np.testing.assert_array_equal(self.soinn.nodes[1], [1 - 2/100, 0])
+        np.testing.assert_array_equal(self.soinn.nodes[2], [1 - 2/100, 1 - 1/100])
+        np.testing.assert_array_equal(self.soinn.nodes[0], [0, 0])
+        np.testing.assert_array_equal(self.soinn.nodes[3], [0, 1])
 
 
 if __name__ == '__main__':

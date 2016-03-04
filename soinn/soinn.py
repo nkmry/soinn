@@ -128,9 +128,12 @@ class Soinn(object):
         w = self.nodes[winner_index]
         self.nodes[winner_index] = w + (signal - w)/self.winning_times[winner_index]
 
-
     def __update_adjacent_nodes(self, winner_index, signal):
-        pass
+        pals = self.adjacent_mat[winner_index]
+        for k in pals.keys():
+            i = k[1]
+            w = self.nodes[i]
+            self.nodes[i] = w + (signal - w)/(100 * self.winning_times[i])
 
     def __delete_nodes(self, indexes):
         n = len(self.winning_times)
