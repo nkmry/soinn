@@ -83,8 +83,20 @@ class Soinn(object):
             D[indexes[i]] = float('nan')
         return indexes, sq_dists
 
-    def __calculate_similarity_thresholds(self, node_index):
-        pass
+    def __calculate_similarity_thresholds(self, node_indexes):
+        sim_thresholds = []
+        for i in node_indexes:
+            pals = self.adjacent_mat[i, :]
+            if len(pals) == 0:
+                idx, sq_dists = self.__find_nearest_nodes(2, self.nodes[i, :])
+                sim_thresholds.append(sq_dists[1])
+            else:
+                pal_indexes = []
+                for k in pals.keys():
+                    pal_indexes.append(k[1])
+                sq_dists = np.sum((self.nodes[pal_indexes] - np.stack([self.nodes[i] for j in range(len(pal_indexes))]))**2, 1)
+                sim_thresholds.append(np.max(sq_dists))
+        return sim_thresholds
 
     def __add_edge(self, node_indexes):
         self.__set_edge_weight(node_indexes, 1)

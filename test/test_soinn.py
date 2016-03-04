@@ -139,5 +139,12 @@ class TestSoinn(unittest.TestCase):
         self.assertEqual(indexes, [0, 3])
         self.assertEqual(sq_dists, [1, 2])
 
+    def test_calculate_similarity_thresholds(self):
+        self.soinn.adjacent_mat[0, 2:] = 1
+        self.soinn.adjacent_mat[2:, 0] = 1
+        self.assertEqual(self.soinn._Soinn__calculate_similarity_thresholds([0]), [2])
+        self.assertEqual(self.soinn._Soinn__calculate_similarity_thresholds([0, 1]), [2, 1])
+
+
 if __name__ == '__main__':
     unittest.main()
