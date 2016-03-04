@@ -11,9 +11,6 @@ class TestSoinn(unittest.TestCase):
         self.soinn.adjacent_mat = dok_matrix((4, 4))
         self.soinn.winning_times = [1] * 4
 
-    def test_input_signal(self):
-        pass
-
     def test_check_signal(self):
         self.soinn = Soinn()
         signal = [0, 1, 2]
@@ -140,7 +137,6 @@ class TestSoinn(unittest.TestCase):
         expected = [[0, 1, 1], [1, 0, 0], [1, 0, 0]]
         np.testing.assert_array_equal(self.soinn.adjacent_mat.toarray(), expected)
 
-
     def test_find_nearest_nodes(self):
         signal = np.array([-1, 0])
         indexes, sq_dists = self.soinn._Soinn__find_nearest_nodes(1, signal)
@@ -178,6 +174,13 @@ class TestSoinn(unittest.TestCase):
         np.testing.assert_array_equal(self.soinn.nodes[2], [1 - 2/100, 1 - 1/100])
         np.testing.assert_array_equal(self.soinn.nodes[0], [0, 0])
         np.testing.assert_array_equal(self.soinn.nodes[3], [0, 1])
+
+    def test_input_signal(self):
+        n = 500
+        data = np.random.rand(n, 2)
+        for i in range(n):
+            self.soinn.input_signal(data[i])
+        print(self.soinn)
 
 
 if __name__ == '__main__':
