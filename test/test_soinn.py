@@ -145,6 +145,18 @@ class TestSoinn(unittest.TestCase):
         self.assertEqual(self.soinn._Soinn__calculate_similarity_thresholds([0]), [2])
         self.assertEqual(self.soinn._Soinn__calculate_similarity_thresholds([0, 1]), [2, 1])
 
+    def test_update_winner(self):
+        self.soinn.winning_times[0] = 2 - 1
+        np.testing.assert_array_equal(self.soinn.nodes[0, :], [0, 0])
+        self.soinn._Soinn__update_winner(0, np.array([-1, 0], dtype=np.float64))
+        np.testing.assert_array_equal(self.soinn.nodes[0, :], [-0.5, 0])
+        self.assertEqual(self.soinn.winning_times[0], 2)
+        self.soinn.winning_times[1] = 3 - 1
+        np.testing.assert_array_equal(self.soinn.nodes[1, :], [1, 0])
+        self.soinn._Soinn__update_winner(1, np.array([2, 0], dtype=np.float64))
+        np.testing.assert_array_equal(self.soinn.nodes[1, :], [1 + 1/3, 0])
+        self.assertEqual(self.soinn.winning_times[1], 3)
+
 
 if __name__ == '__main__':
     unittest.main()

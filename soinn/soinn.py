@@ -124,7 +124,10 @@ class Soinn(object):
         self.adjacent_mat[index[1], index[0]] = weight
 
     def __update_winner(self, winner_index, signal):
-        pass
+        self.winning_times[winner_index] += 1
+        w = self.nodes[winner_index]
+        self.nodes[winner_index] = w + (signal - w)/self.winning_times[winner_index]
+
 
     def __update_adjacent_nodes(self, winner_index, signal):
         pass
