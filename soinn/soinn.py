@@ -26,6 +26,7 @@ class Soinn(object):
         self.nodes = np.array([], dtype=np.float64)
         self.winning_times = []
         self.adjacent_mat = dok_matrix((0, 0), dtype=np.float64)
+        self.prev_remained_indexes = []
 
     def input_signal(self, signal: np.ndarray):
         """ Input a new signal to SOINN
@@ -144,7 +145,9 @@ class Soinn(object):
         self.nodes = np.delete(self.nodes, indexes, 0)
         remained_indexes = list(set([i for i in range(n)]) - set(indexes))
         self.winning_times = [self.winning_times[i] for i in remained_indexes]
-        self.adjacent_mat = self.adjacent_mat[np.ix_(remained_indexes, remained_indexes)]
+        if self.prev_remained_indexes != remained_indexes:
+            self.adjacent_mat = self.adjacent_mat[np.ix_(remained_indexes, remained_indexes)]
+        self.prev_remained_indexes = remained_indexes
 
     def __delete_noise_nodes(self):
         n = len(self.winning_times)
