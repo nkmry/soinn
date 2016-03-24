@@ -80,7 +80,7 @@ class Soinn(object):
         n = self.nodes.shape[0]
         indexes = [0.0] * num
         sq_dists = [0.0] * num
-        D = np.sum((self.nodes - np.stack([signal for i in range(n)], 0))**2, 1)
+        D = np.sum((self.nodes - np.array([signal] * n))**2, 1)
         for i in range(num):
             indexes[i] = np.nanargmin(D)
             sq_dists[i] = D[indexes[i]]
