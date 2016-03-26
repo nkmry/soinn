@@ -98,7 +98,7 @@ class Soinn(object):
                 pal_indexes = []
                 for k in pals.keys():
                     pal_indexes.append(k[1])
-                sq_dists = np.sum((self.nodes[pal_indexes] - np.stack([self.nodes[i] for j in range(len(pal_indexes))]))**2, 1)
+                sq_dists = np.sum((self.nodes[pal_indexes] - np.array([self.nodes[i] * len(pal_indexes)]))**2, 1)
                 sim_thresholds.append(np.max(sq_dists))
         return sim_thresholds
 
