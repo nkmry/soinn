@@ -137,6 +137,21 @@ class TestSoinn(unittest.TestCase):
         expected = [[0, 1, 1], [1, 0, 0], [1, 0, 0]]
         np.testing.assert_array_equal(self.soinn.adjacent_mat.toarray(), expected)
 
+    def test_update_adjacent_mat(self):
+        self.soinn.adjacent_mat[0, 1] = 1
+        self.soinn.adjacent_mat[1, 0] = 1
+        self.soinn.adjacent_mat[0, 2] = 2
+        self.soinn.adjacent_mat[2, 0] = 2
+        self.soinn.adjacent_mat[2, 3] = 3
+        self.soinn.adjacent_mat[3, 2] = 3
+
+        indexes = [1]
+        expected1 = self.soinn.adjacent_mat[np.ix_([0, 2, 3], [0, 2, 3])]
+        self.soinn._Soinn__update_adjacent_mat(indexes, 4, 3)
+        expected2 = [[0, 2, 0], [2, 0, 3], [0, 3, 0]]
+        np.testing.assert_array_equal(self.soinn.adjacent_mat.toarray(), expected1.toarray())
+        np.testing.assert_array_equal(self.soinn.adjacent_mat.toarray(), expected2)
+
     def test_find_nearest_nodes(self):
         signal = np.array([-1, 0])
         indexes, sq_dists = self.soinn._Soinn__find_nearest_nodes(1, signal)
