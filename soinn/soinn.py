@@ -144,9 +144,7 @@ class Soinn(object):
         self.nodes = np.delete(self.nodes, indexes, 0)
         remained_indexes = list(set([i for i in range(n)]) - set(indexes))
         self.winning_times = [self.winning_times[i] for i in remained_indexes]
-        #old_ver_adjacent_mat = self.adjacent_mat[np.ix_(remained_indexes, remained_indexes)]
         self.__update_adjacent_mat(indexes, n, len(remained_indexes))
-        #assert (old_ver_adjacent_mat.toarray() == self.adjacent_mat.toarray()).all()
 
     def __update_adjacent_mat(self, indexes, prev_n, next_n):
         while indexes:
