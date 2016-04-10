@@ -140,6 +140,8 @@ class Soinn(object):
             self.nodes[i] = w + (signal - w)/(100 * self.winning_times[i])
 
     def __delete_nodes(self, indexes):
+        if not indexes:
+            return
         n = len(self.winning_times)
         self.nodes = np.delete(self.nodes, indexes, 0)
         remained_indexes = list(set([i for i in range(n)]) - set(indexes))

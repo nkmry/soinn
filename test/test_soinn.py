@@ -1,4 +1,5 @@
 import unittest
+import time
 import numpy as np
 from scipy.sparse import dok_matrix
 from soinn import Soinn
@@ -175,11 +176,20 @@ class TestSoinn(unittest.TestCase):
         np.testing.assert_array_equal(self.soinn.nodes[0], [0, 0])
         np.testing.assert_array_equal(self.soinn.nodes[3], [0, 1])
 
+    @unittest.skip('skip test_input_signal() because it takes much time.')
     def test_input_signal(self):
-        n = 500
-        data = np.random.rand(n, 2)
-        for i in range(n):
-            self.soinn.input_signal(data[i])
+        n = 5000
+        loop_num = 10
+        elapsed_time = 0
+        for l in range(loop_num):
+            data = np.random.rand(n, 2)
+            self.soinn = Soinn()
+            start = time.time()
+            for i in range(n):
+                self.soinn.input_signal(data[i])
+            elapsed_time += time.time() - start
+        elapsed_time /= loop_num
+        print('average time: ', str(elapsed_time), 'sec')
         print(self.soinn)
 
 
