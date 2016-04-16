@@ -146,9 +146,9 @@ class Soinn(object):
         self.nodes = np.delete(self.nodes, indexes, 0)
         remained_indexes = list(set([i for i in range(n)]) - set(indexes))
         self.winning_times = [self.winning_times[i] for i in remained_indexes]
-        self.__update_adjacent_mat(indexes, n, len(remained_indexes))
+        self.__delete_nodes_from_adjacent_mat(indexes, n, len(remained_indexes))
 
-    def __update_adjacent_mat(self, indexes, prev_n, next_n):
+    def __delete_nodes_from_adjacent_mat(self, indexes, prev_n, next_n):
         while indexes:
             next_adjacent_mat = dok_matrix((prev_n, prev_n))
             for key1, key2 in self.adjacent_mat.keys():

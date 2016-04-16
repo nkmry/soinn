@@ -138,7 +138,7 @@ class TestSoinn(unittest.TestCase):
         expected = [[0, 1, 1], [1, 0, 0], [1, 0, 0]]
         np.testing.assert_array_equal(self.soinn.adjacent_mat.toarray(), expected)
 
-    def test_update_adjacent_mat(self):
+    def test_delete_nodes_from_adjacent_mat(self):
         self.soinn.adjacent_mat[0, 1] = 1
         self.soinn.adjacent_mat[1, 0] = 1
         self.soinn.adjacent_mat[0, 2] = 2
@@ -148,7 +148,7 @@ class TestSoinn(unittest.TestCase):
 
         indexes = [1]
         expected1 = self.soinn.adjacent_mat[np.ix_([0, 2, 3], [0, 2, 3])]
-        self.soinn._Soinn__update_adjacent_mat(indexes, 4, 3)
+        self.soinn._Soinn__delete_nodes_from_adjacent_mat(indexes, 4, 3)
         expected2 = [[0, 2, 0], [2, 0, 3], [0, 3, 0]]
         np.testing.assert_array_equal(self.soinn.adjacent_mat.toarray(), expected1.toarray())
         np.testing.assert_array_equal(self.soinn.adjacent_mat.toarray(), expected2)
@@ -172,7 +172,7 @@ class TestSoinn(unittest.TestCase):
         expected = a[np.ix_(remain_indexes, remain_indexes)]
         expected_time = time.time() - start
         start = time.time()
-        self.soinn._Soinn__update_adjacent_mat(indexes, n, len(remain_indexes))
+        self.soinn._Soinn__delete_nodes_from_adjacent_mat(indexes, n, len(remain_indexes))
         actual_time = time.time() - start
         self.assertEqual(self.soinn.adjacent_mat.shape, expected.shape)
         np.testing.assert_array_equal(self.soinn.adjacent_mat.toarray(), expected.toarray())
