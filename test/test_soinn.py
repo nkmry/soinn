@@ -138,6 +138,48 @@ class TestSoinn(unittest.TestCase):
         expected = [[0, 1, 1], [1, 0, 0], [1, 0, 0]]
         np.testing.assert_array_equal(self.soinn.adjacent_mat.toarray(), expected)
 
+    def test_update_adjacent_mat(self):
+        self.soinn.adjacent_mat[0, 1] = 1
+        self.soinn.adjacent_mat[1, 0] = 1
+        self.soinn.adjacent_mat[0, 2] = 2
+        self.soinn.adjacent_mat[2, 0] = 2
+        self.soinn.adjacent_mat[2, 3] = 3
+        self.soinn.adjacent_mat[3, 2] = 3
+
+        indexes = [1]
+        expected1 = self.soinn.adjacent_mat[np.ix_([0, 2, 3], [0, 2, 3])]
+        self.soinn._Soinn__update_adjacent_mat(indexes, 4, 3)
+        expected2 = [[0, 2, 0], [2, 0, 3], [0, 3, 0]]
+        np.testing.assert_array_equal(self.soinn.adjacent_mat.toarray(), expected1.toarray())
+        np.testing.assert_array_equal(self.soinn.adjacent_mat.toarray(), expected2)
+
+    def test_performance_of_update_adjacent_mat(self):
+        n = 500
+        p = 0.01
+        a = dok_matrix((n, n))
+        for c in range(n):
+            i = np.random.randint(n)
+            j = np.random.randint(n)
+            if i == j:
+                continue
+            a[i, j] += 1
+        indexes = np.random.randint(n, size=int(p * n)).tolist()
+        indexes = sorted(list(set(indexes)))
+        remain_indexes = list(set([i for i in range(n)]) - set(indexes))
+        self.soinn.adjacent_mat = a.copy()
+
+        start = time.time()
+        expected = a[np.ix_(remain_indexes, remain_indexes)]
+        expected_time = time.time() - start
+        start = time.time()
+        self.soinn._Soinn__update_adjacent_mat(indexes, n, len(remain_indexes))
+        actual_time = time.time() - start
+        self.assertEqual(self.soinn.adjacent_mat.shape, expected.shape)
+        np.testing.assert_array_equal(self.soinn.adjacent_mat.toarray(), expected.toarray())
+        #print('np._ix: ', expected_time)
+        #print('__update_adjacent_mat:', actual_time)
+        self.assertLess(actual_time, expected_time)
+
     def test_find_nearest_nodes(self):
         signal = np.array([-1, 0])
         indexes, sq_dists = self.soinn._Soinn__find_nearest_nodes(1, signal)
