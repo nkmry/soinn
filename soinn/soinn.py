@@ -176,5 +176,4 @@ class Soinn(object):
         for i in range(n):
             if len(self.adjacent_mat[i, :]) < self.min_degree:
                 noise_indexes.append(i)
-        if noise_indexes:
-            self.__delete_nodes(noise_indexes)
+        self.__delete_nodes(noise_indexes)
