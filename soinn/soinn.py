@@ -193,23 +193,31 @@ class Soinn(BaseEstimator, ClusterMixin):
     def __label_nodes(self, min_cluster_size=3):
         n = self.nodes.shape[0]
         labels = np.array([Soinn.NOISE_LABEL for _ in range(n)], dtype='i')
-        current_cluster_label = 0
+        current_label = 0
         for i in range(n):
             if labels[i] == Soinn.NOISE_LABEL:
-                cluster_indexes = []
-                queue = [i]
-                while len(queue) > 0:
-                    idx = queue.pop(0)
-                    if labels[idx] == Soinn.NOISE_LABEL:
-                        labels[idx] = current_cluster_label
-                        cluster_indexes.append(idx)
-                        queue += list(np.where(
-                            self.adjacent_mat[idx, :].toarray() > 0)[1])
+                labels, cluster_indexes =\
+                    self.__label_cluster_nodes(labels, i, current_label)
                 if len(cluster_indexes) < min_cluster_size:
                     labels[cluster_indexes] = Soinn.NOISE_LABEL
                 else:
-                    current_cluster_label += 1
+                    current_label += 1
         return labels
+
+    def __label_cluster_nodes(self, labels, first_node_index, cluster_label):
+        """
+        label cluster nodes with breadth first search
+        """
+        labeled_indexes = []
+        queue = [first_node_index]
+        while len(queue) > 0:
+            idx = queue.pop(0)
+            if labels[idx] == Soinn.NOISE_LABEL:
+                labels[idx] = cluster_label
+                labeled_indexes.append(idx)
+                queue += list(np.where(
+                    self.adjacent_mat[idx, :].toarray() > 0)[1])
+        return labels, labeled_indexes
 
     def __label_samples(self, X):
         return []
