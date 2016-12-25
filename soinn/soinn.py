@@ -12,6 +12,8 @@ class Soinn(BaseEstimator, ClusterMixin):
         Ver. 0.1.0
     """
 
+    NOISE_LABEL = -1
+
     def __init__(self, delete_node_period=300, max_edge_age=50):
         """
         :param delete_node_period: A period deleting nodes.
@@ -188,8 +190,26 @@ class Soinn(BaseEstimator, ClusterMixin):
                 noise_indexes.append(i)
         self.__delete_nodes(noise_indexes)
 
-    def __label_nodes(self):
-        return []
+    def __label_nodes(self, min_cluster_size=3):
+        n = self.nodes.shape[0]
+        labels = np.array([Soinn.NOISE_LABEL for _ in range(n)], dtype='i')
+        current_cluster_label = 0
+        for i in range(n):
+            if labels[i] == Soinn.NOISE_LABEL:
+                cluster_indexes = []
+                queue = [i]
+                while len(queue) > 0:
+                    idx = queue.pop(0)
+                    if labels[idx] == Soinn.NOISE_LABEL:
+                        labels[idx] = current_cluster_label
+                        cluster_indexes.append(idx)
+                        queue += list(np.where(
+                            self.adjacent_mat[idx, :].toarray() > 0)[1])
+                if len(cluster_indexes) < min_cluster_size:
+                    labels[cluster_indexes] = Soinn.NOISE_LABEL
+                else:
+                    current_cluster_label += 1
+        return labels
 
     def __label_samples(self, X):
         return []
