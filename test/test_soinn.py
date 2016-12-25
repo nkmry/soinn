@@ -3,6 +3,7 @@ import time
 import numpy as np
 from scipy.sparse import dok_matrix
 from soinn import Soinn
+from sklearn.utils.estimator_checks import check_clustering
 
 
 class TestSoinn(unittest.TestCase):
@@ -11,6 +12,12 @@ class TestSoinn(unittest.TestCase):
         self.soinn.nodes = np.array([[0, 0], [1, 0], [1, 1], [0, 1]], dtype=np.float64)
         self.soinn.adjacent_mat = dok_matrix((4, 4))
         self.soinn.winning_times = [1] * 4
+
+    def test_skleran_api(self):
+        check_clustering('Soinn', Soinn)
+
+    def test_fit(self):
+        pass
 
     def test_check_signal(self):
         self.soinn = Soinn()

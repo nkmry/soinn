@@ -4,9 +4,10 @@
 
 import numpy as np
 from scipy.sparse import dok_matrix
+from sklearn.base import BaseEstimator, ClusterMixin
 
 
-class Soinn(object):
+class Soinn(BaseEstimator, ClusterMixin):
     """ Self-Organizing Incremental Neural Network (SOINN)
         Ver. 0.1.0
     """
