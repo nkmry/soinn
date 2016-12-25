@@ -27,6 +27,15 @@ class Soinn(BaseEstimator, ClusterMixin):
         self.nodes = np.array([], dtype=np.float64)
         self.winning_times = []
         self.adjacent_mat = dok_matrix((0, 0), dtype=np.float64)
+        self.node_labels = []
+        self.labels_ = []
+
+    def fit(self, X):
+        for x in X:
+            self.input_signal(x)
+        self.node_labels = self.__label_nodes()
+        self.labels_ = self.__label_samples(X)
+        return self
 
     def input_signal(self, signal: np.ndarray):
         """ Input a new signal to SOINN
@@ -178,3 +187,9 @@ class Soinn(BaseEstimator, ClusterMixin):
             if len(self.adjacent_mat[i, :]) < self.min_degree:
                 noise_indexes.append(i)
         self.__delete_nodes(noise_indexes)
+
+    def __label_nodes(self):
+        return []
+
+    def __label_samples(self, X):
+        return []
