@@ -35,7 +35,6 @@ class Soinn(BaseEstimator, ClusterMixin):
     def fit(self, X):
         for x in X:
             self.input_signal(x)
-        self.node_labels = self.__label_nodes()
         self.labels_ = self.__label_samples(X)
         return self
 
@@ -90,7 +89,7 @@ class Soinn(BaseEstimator, ClusterMixin):
 
     def __find_nearest_nodes(self, num: int, signal: np.ndarray):
         n = self.nodes.shape[0]
-        indexes = [0.0] * num
+        indexes = [0] * num
         sq_dists = [0.0] * num
         D = np.sum((self.nodes - np.array([signal] * n))**2, 1)
         for i in range(num):
@@ -202,9 +201,11 @@ class Soinn(BaseEstimator, ClusterMixin):
                     labels[cluster_indexes] = Soinn.NOISE_LABEL
                 else:
                     current_label += 1
+        self.node_labels = labels
         return labels
 
-    def __label_cluster_nodes(self, labels, first_node_index, cluster_label):
+    def __label_cluster_nodes(self, labels: np.ndarray, first_node_index: int,
+                              cluster_label: int):
         """
         label cluster nodes with breadth first search
         """
@@ -219,5 +220,13 @@ class Soinn(BaseEstimator, ClusterMixin):
                     self.adjacent_mat[idx, :].toarray() > 0)[1])
         return labels, labeled_indexes
 
-    def __label_samples(self, X):
-        return []
+    def __label_samples(self, X: np.ndarray):
+        self.__label_nodes()
+        n = X.shape[0]
+        labels = np.array([Soinn.NOISE_LABEL for _ in range(n)], dtype='i')
+        for i, x in enumerate(X):
+            i_nearest, dist = self.__find_nearest_nodes(1, x)
+            sim_threshold = self.__calculate_similarity_thresholds(i_nearest)
+            if dist < sim_threshold:
+                labels[i] = self.node_labels[i_nearest[0]]
+        return labels
