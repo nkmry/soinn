@@ -221,6 +221,11 @@ class Soinn(BaseEstimator, ClusterMixin):
         return labels, labeled_indexes
 
     def __label_samples(self, X: np.ndarray):
+        """
+        :param X: (n, d) matrix whose rows are samples.
+        :rtype list:
+        :return list of labels
+        """
         self.__label_nodes()
         n = X.shape[0]
         labels = np.array([Soinn.NOISE_LABEL for _ in range(n)], dtype='i')

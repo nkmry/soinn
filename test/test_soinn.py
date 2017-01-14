@@ -1,6 +1,7 @@
 import unittest
 import time
 import numpy as np
+from numpy.testing import assert_array_equal
 from scipy.sparse import dok_matrix
 from soinn import Soinn
 from sklearn.utils.estimator_checks import check_clustering
@@ -266,6 +267,20 @@ class TestSoinn(unittest.TestCase):
         self.assertEqual(labels[1], labels[4])
         self.assertNotEqual(labels[1], -1)
         self.assertEqual(labels[5], -1)
+
+    def test_label_samples(self):
+        # There are 6 nodes and nodes indexed 0, 2 and 3 make a cluster.
+        self.soinn._Soinn__add_node([0, 2])
+        self.soinn._Soinn__add_node([1, 2])
+        self.soinn._Soinn__add_edge([0, 2])
+        self.soinn._Soinn__add_edge([0, 3])
+        self.soinn._Soinn__add_edge([1, 4])
+        actual = self.soinn._Soinn__label_samples(np.array([[-0.1, -0.1],
+                                                            [1.1, 1.1],
+                                                            [100, 100]]))
+        expected = np.array(
+            [self.soinn.node_labels[0]] * 2 + [Soinn.NOISE_LABEL])
+        assert_array_equal(actual, expected)
 
 
 if __name__ == '__main__':
