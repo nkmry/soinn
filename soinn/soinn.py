@@ -2,6 +2,7 @@
 # This software is released under the MIT License.
 # http://opensource.org/licenses/mit-license.php
 
+from typing import overload
 import numpy as np
 from scipy.sparse import dok_matrix
 from sklearn.base import BaseEstimator, ClusterMixin
@@ -33,13 +34,20 @@ class Soinn(BaseEstimator, ClusterMixin):
         self.labels_ = []
 
     def fit(self, X):
+        self.__init__(self.delete_node_period, self.max_edge_age)
         for x in X:
             self.input_signal(x)
         self.labels_ = self.__label_samples(X)
         return self
 
+    def fit_predict(self, X, y=None):
+        return self.fit(X).labels_
+
     def input_signal(self, signal: np.ndarray):
-        """ Input a new signal to SOINN
+        """
+        Input a new signal one by one, which means training in online manner.
+        fit() calls __init__() before training, which means resetting the
+        state. So the function does batch training.
         :param signal: A new input signal
         :return:
         """
@@ -64,12 +72,17 @@ class Soinn(BaseEstimator, ClusterMixin):
         if self.num_signal % self.delete_node_period == 0:
             self.__delete_noise_nodes()
 
+    @overload
+    def __check_signal(self, signal: list) -> None: ...
+
     def __check_signal(self, signal: np.ndarray):
         """ check type and dimensionality of an input signal.
         If signal is the first input signal, set the dimension of it as self.dim.
         So, this method have to be called before calling functions that use self.dim.
         :param signal: an input signal
         """
+        if isinstance(signal, list):
+            signal = np.array(signal)
         if not(isinstance(signal, np.ndarray)):
             raise TypeError()
         if len(signal.shape) != 1:
@@ -227,7 +240,7 @@ class Soinn(BaseEstimator, ClusterMixin):
         :return list of labels
         """
         self.__label_nodes()
-        n = X.shape[0]
+        n = len(X)
         labels = np.array([Soinn.NOISE_LABEL for _ in range(n)], dtype='i')
         for i, x in enumerate(X):
             i_nearest, dist = self.__find_nearest_nodes(1, x)

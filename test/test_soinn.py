@@ -16,7 +16,6 @@ class TestSoinn(unittest.TestCase):
         self.soinn.adjacent_mat = dok_matrix((4, 4))
         self.soinn.winning_times = [1] * 4
 
-    @unittest.skip('temporary')
     def test_skleran_api(self):
         check_clustering('Soinn', Soinn)
 
@@ -25,7 +24,7 @@ class TestSoinn(unittest.TestCase):
 
     def test_check_signal(self):
         self.soinn = Soinn()
-        signal = [0, 1, 2]
+        signal = 'hoge'
         self.assertRaises(TypeError, self.soinn._Soinn__check_signal, signal)
         signal = np.arange(6).reshape(2, 3)
         self.assertRaises(TypeError, self.soinn._Soinn__check_signal, signal)
@@ -36,6 +35,8 @@ class TestSoinn(unittest.TestCase):
         self.assertEqual(self.soinn.dim, d)
         signal = np.arange(d + 1)
         self.assertRaises(TypeError, self.soinn._Soinn__check_signal, signal)
+        signal = [i for i in range(d)]
+        self.soinn._Soinn__check_signal(signal)
 
     def test_add_node(self):
         self.soinn = Soinn()
