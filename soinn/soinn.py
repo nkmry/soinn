@@ -34,6 +34,10 @@ class Soinn(BaseEstimator, ClusterMixin):
         self.labels_ = []
 
     def fit(self, X):
+        """
+        train data in batch manner
+        :param X: array-like or ndarray
+        """
         self.__init__(self.delete_node_period, self.max_edge_age)
         for x in X:
             self.input_signal(x)
@@ -41,6 +45,14 @@ class Soinn(BaseEstimator, ClusterMixin):
         return self
 
     def fit_predict(self, X, y=None):
+        """
+        train data and predict cluster index for each sample.
+        :param X: array-like or ndarray
+        :rtype list:
+        :return:
+            cluster index for each sample. if a sample is noise, its index is
+            Soinn.NOISE_LABEL.
+        """
         return self.fit(X).labels_
 
     def input_signal(self, signal: np.ndarray):
