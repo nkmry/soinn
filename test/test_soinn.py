@@ -1,20 +1,30 @@
 import unittest
 import time
 import numpy as np
+from numpy.testing import assert_array_equal
 from scipy.sparse import dok_matrix
 from soinn import Soinn
+from sklearn.utils.estimator_checks import check_clustering
 
 
 class TestSoinn(unittest.TestCase):
     def setUp(self):
         self.soinn = Soinn()
-        self.soinn.nodes = np.array([[0, 0], [1, 0], [1, 1], [0, 1]], dtype=np.float64)
+        self.soinn.nodes = np.array([[0, 0], [1, 0], [1, 1], [0, 1]]
+                                    , dtype=np.float64)
+        self.soinn.dim = 2
         self.soinn.adjacent_mat = dok_matrix((4, 4))
         self.soinn.winning_times = [1] * 4
 
+    def test_skleran_api(self):
+        check_clustering('Soinn', Soinn)
+
+    def test_fit(self):
+        pass
+
     def test_check_signal(self):
         self.soinn = Soinn()
-        signal = [0, 1, 2]
+        signal = 'hoge'
         self.assertRaises(TypeError, self.soinn._Soinn__check_signal, signal)
         signal = np.arange(6).reshape(2, 3)
         self.assertRaises(TypeError, self.soinn._Soinn__check_signal, signal)
@@ -25,6 +35,8 @@ class TestSoinn(unittest.TestCase):
         self.assertEqual(self.soinn.dim, d)
         signal = np.arange(d + 1)
         self.assertRaises(TypeError, self.soinn._Soinn__check_signal, signal)
+        signal = [i for i in range(d)]
+        self.soinn._Soinn__check_signal(signal)
 
     def test_add_node(self):
         self.soinn = Soinn()
@@ -233,6 +245,43 @@ class TestSoinn(unittest.TestCase):
         elapsed_time /= loop_num
         print('average time: ', str(elapsed_time), 'sec')
         print(self.soinn)
+
+    def test_label_nodes(self):
+        self.soinn._Soinn__add_node([0, 2])
+        self.soinn._Soinn__add_node([1, 2])
+        self.soinn._Soinn__add_edge([0, 2])
+        self.soinn._Soinn__add_edge([0, 3])
+        self.soinn._Soinn__add_edge([1, 4])
+        labels = self.soinn._Soinn__label_nodes()
+        self.assertEqual(len(labels), self.soinn.nodes.shape[0])
+        self.assertEqual(labels[0], labels[2])
+        self.assertEqual(labels[0], labels[3])
+        self.assertNotEqual(labels[0], -1)
+        self.assertEqual(labels[1], -1)
+        self.assertEqual(labels[4], -1)
+        self.assertEqual(labels[5], -1)
+        labels = self.soinn._Soinn__label_nodes(min_cluster_size=2)
+        self.assertEqual(len(labels), self.soinn.nodes.shape[0])
+        self.assertEqual(labels[0], labels[2])
+        self.assertEqual(labels[0], labels[3])
+        self.assertNotEqual(labels[0], -1)
+        self.assertEqual(labels[1], labels[4])
+        self.assertNotEqual(labels[1], -1)
+        self.assertEqual(labels[5], -1)
+
+    def test_label_samples(self):
+        # There are 6 nodes and nodes indexed 0, 2 and 3 make a cluster.
+        self.soinn._Soinn__add_node([0, 2])
+        self.soinn._Soinn__add_node([1, 2])
+        self.soinn._Soinn__add_edge([0, 2])
+        self.soinn._Soinn__add_edge([0, 3])
+        self.soinn._Soinn__add_edge([1, 4])
+        actual = self.soinn._Soinn__label_samples(np.array([[-0.1, -0.1],
+                                                            [1.1, 1.1],
+                                                            [100, 100]]))
+        expected = np.array(
+            [self.soinn.node_labels[0]] * 2 + [Soinn.NOISE_LABEL])
+        assert_array_equal(actual, expected)
 
 
 if __name__ == '__main__':
