@@ -15,16 +15,21 @@ class Soinn(BaseEstimator, ClusterMixin):
 
     NOISE_LABEL = -1
 
-    def __init__(self, delete_node_period=300, max_edge_age=50):
+    def __init__(self, delete_node_period=300, max_edge_age=50,
+                 init_node_num=3):
         """
-        :param delete_node_period: A period deleting nodes.
-                The nodes that doesn't satisfy some condition are deleted every this period.
-        :param max_edge_age: The maximum of edges' ages.
-                If an edge's age is more than this, the edge is deleted.
-        :return:
+        :param delete_node_period:
+            A period deleting nodes. The nodes that doesn't satisfy some
+            condition are deleted every this period.
+        :param max_edge_age:
+            The maximum of edges' ages. If an edge's age is more than this,
+            the edge is deleted.
+        :param init_node_num:
+            The number of nodes used for initialization
         """
         self.delete_node_period = delete_node_period
         self.max_edge_age = max_edge_age
+        self.init_node_num = init_node_num
         self.min_degree = 1
         self.num_signal = 0
         self.nodes = np.array([], dtype=np.float64)
@@ -66,7 +71,7 @@ class Soinn(BaseEstimator, ClusterMixin):
         signal = self.__check_signal(signal)
         self.num_signal += 1
 
-        if self.nodes.shape[0] < 3:
+        if self.nodes.shape[0] < self.init_node_num:
             self.__add_node(signal)
             return
 
