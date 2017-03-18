@@ -63,7 +63,7 @@ class Soinn(BaseEstimator, ClusterMixin):
         :param signal: A new input signal
         :return:
         """
-        self.__check_signal(signal)
+        signal = self.__check_signal(signal)
         self.num_signal += 1
 
         if self.nodes.shape[0] < 3:
@@ -88,9 +88,11 @@ class Soinn(BaseEstimator, ClusterMixin):
     def __check_signal(self, signal: list) -> None: ...
 
     def __check_signal(self, signal: np.ndarray):
-        """ check type and dimensionality of an input signal.
-        If signal is the first input signal, set the dimension of it as self.dim.
-        So, this method have to be called before calling functions that use self.dim.
+        """
+        check type and dimensionality of an input signal.
+        If signal is the first input signal, set the dimension of it as
+        self.dim. So, this method have to be called before calling functions
+        that use self.dim.
         :param signal: an input signal
         """
         if isinstance(signal, list):
@@ -104,6 +106,7 @@ class Soinn(BaseEstimator, ClusterMixin):
         else:
             if signal.shape[0] != self.dim:
                 raise TypeError()
+        return signal
 
     def __add_node(self, signal: np.ndarray):
         n = self.nodes.shape[0]
