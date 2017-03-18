@@ -10,7 +10,7 @@ from sklearn.base import BaseEstimator, ClusterMixin
 
 class Soinn(BaseEstimator, ClusterMixin):
     """ Self-Organizing Incremental Neural Network (SOINN)
-        Ver. 0.1.0
+        Ver. 0.2.0
     """
 
     NOISE_LABEL = -1
