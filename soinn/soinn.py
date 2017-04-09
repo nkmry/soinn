@@ -77,7 +77,7 @@ class Soinn(BaseEstimator, ClusterMixin):
 
         winner, dists = self.__find_nearest_nodes(2, signal)
         sim_thresholds = self.__calculate_similarity_thresholds(winner)
-        if dists[0] > sim_thresholds[0] and dists[1] > sim_thresholds[1]:
+        if dists[0] > sim_thresholds[0] or dists[1] > sim_thresholds[1]:
             self.__add_node(signal)
         else:
             self.__add_edge(winner)
