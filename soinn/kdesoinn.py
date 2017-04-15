@@ -2,6 +2,7 @@
 # This software is released under the MIT License.
 # http://opensource.org/licenses/mit-license.php
 
+import numpy as np
 from soinn import Soinn
 
 
@@ -10,7 +11,7 @@ class KdeSoinn(Soinn):
         Ver. 0.0.1
     """
     def __init__(self, delete_node_period=300, max_edge_age=50,
-                 init_node_num=3):
+                 init_node_num=3, coeff=0.1):
         """
         :param delete_node_period:
             A period deleting nodes. The nodes that doesn't satisfy some
@@ -20,5 +21,40 @@ class KdeSoinn(Soinn):
             the edge is deleted.
         :param init_node_num:
             The number of nodes used for initialization
+        :param coeff:
+            Threshold coefficient
         """
         super().__init__(delete_node_period, max_edge_age, init_node_num)
+        self.thresholdCoefficient = coeff
+        self.k = -1
+        self.networkSigmas = []
+
+    def input_signal(self, signal: np.ndarray):
+        """
+        Input a new signal one by one, which means training in online manner.
+        fit() calls __init__() before training, which means resetting the
+        state. So the function does batch training.
+        :param signal: A new input signal
+        :return:
+        """
+        signal = self.__check_signal(signal)
+        self.num_signal += 1
+
+        if self.nodes.shape[0] < self.init_node_num:
+            self.__add_node(signal)
+            return
+
+        winner, dists = self.__find_nearest_nodes(2, signal)
+        sim_thresholds = self.__calculate_similarity_thresholds(winner)
+        if dists[0] > sim_thresholds[0] or dists[1] > sim_thresholds[1]:
+            self.__add_node(signal)
+        else:
+            self.__add_edge(winner)
+            self.__increment_edge_ages(winner[1])
+            winner[1] = self.__delete_old_edges(winner[1])
+            self.__update_winner(winner[1], signal)
+            self.__updateNetworkSigmas(winner[1], 1)
+
+        if self.num_signal % self.delete_node_period == 0:
+            self.__delete_noise_nodes()
+            self.__adjust_network()
