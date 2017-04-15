@@ -37,24 +37,24 @@ class KdeSoinn(Soinn):
         :param signal: A new input signal
         :return:
         """
-        signal = self.__check_signal(signal)
+        signal = self._check_signal(signal)
         self.num_signal += 1
 
         if self.nodes.shape[0] < self.init_node_num:
-            self.__add_node(signal)
+            self._add_node(signal)
             return
 
-        winner, dists = self.__find_nearest_nodes(2, signal)
-        sim_thresholds = self.__calculate_similarity_thresholds(winner)
+        winner, dists = self._find_nearest_nodes(2, signal)
+        sim_thresholds = self._calculate_similarity_thresholds(winner)
         if dists[0] > sim_thresholds[0] or dists[1] > sim_thresholds[1]:
-            self.__add_node(signal)
+            self._add_node(signal)
         else:
-            self.__add_edge(winner)
-            self.__increment_edge_ages(winner[1])
-            winner[1] = self.__delete_old_edges(winner[1])
-            self.__update_winner(winner[1], signal)
-            self.__updateNetworkSigmas(winner[1], 1)
+            self._add_edge(winner)
+            self._increment_edge_ages(winner[1])
+            winner[1] = self._delete_old_edges(winner[1])
+            self._update_winner(winner[1], signal)
+            self.__update_network_sigmas(winner[1], 1)
 
         if self.num_signal % self.delete_node_period == 0:
-            self.__delete_noise_nodes()
+            self._delete_noise_nodes()
             self.__adjust_network()
