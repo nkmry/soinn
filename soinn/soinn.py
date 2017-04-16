@@ -158,17 +158,21 @@ class Soinn(BaseEstimator, ClusterMixin):
             self._set_edge_weight((winner_index, k[1]), v + 1)
 
     def _delete_old_edges(self, winner_index):
-        candidates = []
+        """
+        :return: winner_index after deletion
+        """
+        delete_node_candidates = []
         for k, v in self.adjacent_mat[winner_index, :].items():
             if v > self.max_edge_age + 1:
-                candidates.append(k[1])
+                delete_node_candidates.append(k[1])
                 self._set_edge_weight((winner_index, k[1]), 0)
-        delete_indexes = []
-        for i in candidates:
+        delete_node_indexes = []
+        for i in delete_node_candidates:
             if len(self.adjacent_mat[i, :]) == 0:
-                delete_indexes.append(i)
-        self._delete_nodes(delete_indexes)
-        delete_count = sum([1 if i < winner_index else 0 for i in delete_indexes])
+                delete_node_indexes.append(i)
+        self._delete_nodes(delete_node_indexes)
+        delete_count = sum(
+            [1 if i < winner_index else 0 for i in delete_node_indexes])
         return winner_index - delete_count
 
     def _set_edge_weight(self, index, weight):

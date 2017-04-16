@@ -25,9 +25,9 @@ class KdeSoinn(Soinn):
             Threshold coefficient
         """
         super().__init__(delete_node_period, max_edge_age, init_node_num)
-        self.thresholdCoefficient = coeff
+        self.threshold_coefficient = coeff
         self.k = -1
-        self.networkSigmas = []
+        self.network_sigmas = []
 
     def input_signal(self, signal: np.ndarray):
         """
@@ -58,3 +58,44 @@ class KdeSoinn(Soinn):
         if self.num_signal % self.delete_node_period == 0:
             self._delete_noise_nodes()
             self.__adjust_network()
+
+    def _add_node(self, signal):
+        super()._add_node(signal)
+        d = len(signal)
+        self.network_sigmas.append(np.zeros((d, d)))
+
+    def _delete_old_edges(self, winner_index):
+        """
+        :return: winner_index after deletion
+        """
+        delete_node_candidates = []
+        for k, v in self.adjacent_mat[winner_index, :].items():
+            if v > self.max_edge_age + 1:
+                delete_node_candidates.append(k[1])
+                self._set_edge_weight((winner_index, k[1]), 0)
+        delete_node_indexes = []
+        for i in delete_node_candidates:
+            if len(self.adjacent_mat[i, :]) == 0:
+                delete_node_indexes.append(i)
+            else:
+                self.__update_network_sigma(i)
+        self._delete_nodes(delete_node_indexes)
+        delete_count = sum(
+            [1 if i < winner_index else 0 for i in delete_node_indexes])
+        return winner_index - delete_count
+
+    def _delete_nodes(self, indexes):
+        super()._delete_nodes(indexes)
+        for i in indexes:
+            del self.network_sigmas[i]
+
+    def _delete_noise_nodes(self, min_degree=-1):
+        if min_degree < 0:
+            min_degree = self.min_degree
+        n = len(self.winning_times)
+        noise_indexes = []
+        for i in range(n):
+            if len(self.adjacent_mat[i, :]) < min_degree:
+                noise_indexes.append(i)
+        self._delete_nodes(noise_indexes)
+
