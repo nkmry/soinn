@@ -47,16 +47,17 @@ class KdeSoinn(Soinn):
             self._add_node(signal)
             return
 
-        winner, dists = self._find_nearest_nodes(2, signal)
-        sim_thresholds = self._calculate_similarity_thresholds(winner)
+        winners, dists = self._find_nearest_nodes(2, signal)
+        sim_thresholds =\
+            self._calculate_mahalanobis_sim_thresholds(winners, signal)
         if dists[0] > sim_thresholds[0] or dists[1] > sim_thresholds[1]:
             self._add_node(signal)
         else:
-            self._add_edge(winner)
-            self._increment_edge_ages(winner[1])
-            winner[1] = self._delete_old_edges(winner[1])
-            self._update_winner(winner[1], signal)
-            self.__update_network_sigmas(winner[1], 1)
+            self._add_edge(winners)
+            self._increment_edge_ages(winners[1])
+            winners[1] = self._delete_old_edges(winners[1])
+            self._update_winner(winners[1], signal)
+            self.__update_network_sigmas(winners[1], 1)
 
         if self.num_signal % self.delete_node_period == 0:
             self._delete_noise_nodes()
@@ -93,4 +94,29 @@ class KdeSoinn(Soinn):
         for i in reversed(np.sort(indexes)):
             del self.network_sigmas[i]
 
+    def _calculate_mahalanobis_sim_thresholds(self, node_indexes: list, signal):
+        sq_dists = np.zeros(2,1)
+        for i in range(2):
+            C = self._calculate_node_covariance_matrix(node_indexes[i])
+            sq_dists[i] = self._calculate_mahalanobis_distance(
+                signal, self.nodes[node_indexes[i], :], C)
+        return sq_dists
+
+    def _calculate_node_covariance_matrix(self, node_index):
+        n = self.nodes.shape[0]
+        connections = self.adjacent_mat[node_index, :].toarray()
+        pal_indexes = [i for i, c in zip(range(n),connections) if c > 0]
+        if len(pal_indexes) > 0:
+            pals = self.nodes[pal_indexes, :]
+            repeats = [0] * n
+            repeats[node_index] = len(pal_indexes)
+            w = np.sqrt(min(np.sum(((pals - np.repeat(
+                self.nodes, repeats, axis=0)) ** 2), axis=1)))
+            M = self.network_sigmas[node_index]\
+                + self.threshold_coefficient * w * np.eye(self.dim)
+        else:
+            _, sq_dists = self._find_nearest_nodes(2, self.nodes[node_index, :])
+            w = np.sqrt(sq_dists(2))
+            M = self.threshold_coefficient * w * np.eye(self.dim)
+        return M
 
