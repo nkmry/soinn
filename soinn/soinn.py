@@ -110,7 +110,7 @@ class Soinn(BaseEstimator, ClusterMixin):
             raise TypeError()
         if len(signal.shape) != 1:
             raise TypeError()
-        if not(hasattr(self, 'dim')):
+        if self.dim is None:
             self.dim = signal.shape[0]
         else:
             if signal.shape[0] != self.dim:
