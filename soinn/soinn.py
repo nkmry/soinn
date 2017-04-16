@@ -10,7 +10,7 @@ from sklearn.base import BaseEstimator, ClusterMixin
 
 class Soinn(BaseEstimator, ClusterMixin):
     """ Self-Organizing Incremental Neural Network (SOINN)
-        Ver. 0.2.0
+        Ver. 0.3.0
     """
 
     NOISE_LABEL = -1
@@ -32,6 +32,10 @@ class Soinn(BaseEstimator, ClusterMixin):
         self.init_node_num = init_node_num
         self.min_degree = 1
         self.num_signal = 0
+        self._reset_state()
+
+    def _reset_state(self):
+        self.dim = None
         self.nodes = np.array([], dtype=np.float64)
         self.winning_times = []
         self.adjacent_mat = dok_matrix((0, 0), dtype=np.float64)
@@ -43,7 +47,7 @@ class Soinn(BaseEstimator, ClusterMixin):
         train data in batch manner
         :param X: array-like or ndarray
         """
-        self.__init__(self.delete_node_period, self.max_edge_age)
+        self._reset_state()
         for x in X:
             self.input_signal(x)
         self.labels_ = self.__label_samples(X)
