@@ -24,9 +24,12 @@ class KdeSoinn(Soinn):
         :param coeff:
             Threshold coefficient
         """
-        super().__init__(delete_node_period, max_edge_age, init_node_num)
         self.threshold_coefficient = coeff
         self.k = -1
+        super().__init__(delete_node_period, max_edge_age, init_node_num)
+
+    def _reset_state(self):
+        super()._reset_state()
         self.network_sigmas = []
 
     def input_signal(self, signal: np.ndarray):
@@ -77,8 +80,9 @@ class KdeSoinn(Soinn):
         for i in delete_node_candidates:
             if len(self.adjacent_mat[i, :]) == 0:
                 delete_node_indexes.append(i)
-            else:
-                self.__update_network_sigma(i)
+            #else:
+            #    self._update_network_sigma(i)
+            # TODO implement _update_network_sigma()
         self._delete_nodes(delete_node_indexes)
         delete_count = sum(
             [1 if i < winner_index else 0 for i in delete_node_indexes])
@@ -86,16 +90,7 @@ class KdeSoinn(Soinn):
 
     def _delete_nodes(self, indexes):
         super()._delete_nodes(indexes)
-        for i in indexes:
+        for i in reversed(np.sort(indexes)):
             del self.network_sigmas[i]
 
-    def _delete_noise_nodes(self, min_degree=-1):
-        if min_degree < 0:
-            min_degree = self.min_degree
-        n = len(self.winning_times)
-        noise_indexes = []
-        for i in range(n):
-            if len(self.adjacent_mat[i, :]) < min_degree:
-                noise_indexes.append(i)
-        self._delete_nodes(noise_indexes)
 

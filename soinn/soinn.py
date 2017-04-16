@@ -222,11 +222,13 @@ class Soinn(BaseEstimator, ClusterMixin):
             indexes.pop(0)
         self.adjacent_mat.resize((next_n, next_n))
 
-    def _delete_noise_nodes(self):
+    def _delete_noise_nodes(self, min_degree=-1):
+        if min_degree < 0:
+            min_degree = self.min_degree
         n = len(self.winning_times)
         noise_indexes = []
         for i in range(n):
-            if len(self.adjacent_mat[i, :]) < self.min_degree:
+            if len(self.adjacent_mat[i, :]) < min_degree:
                 noise_indexes.append(i)
         self._delete_nodes(noise_indexes)
 

@@ -24,7 +24,7 @@ class TestSoinn(unittest.TestCase):
         pass
 
     def test_check_signal(self):
-        self.soinn = Soinn()
+        self.soinn._reset_state()
         signal = 'hoge'
         self.assertRaises(TypeError, self.soinn._check_signal, signal)
         signal = np.arange(6).reshape(2, 3)
@@ -32,7 +32,6 @@ class TestSoinn(unittest.TestCase):
         d = 6
         signal = np.arange(d)
         self.soinn._check_signal(signal)
-        self.assertTrue(hasattr(self.soinn, 'dim'))
         self.assertEqual(self.soinn.dim, d)
         signal = np.arange(d + 1)
         self.assertRaises(TypeError, self.soinn._check_signal, signal)
@@ -40,7 +39,7 @@ class TestSoinn(unittest.TestCase):
         self.soinn._check_signal(signal)
 
     def test_add_node(self):
-        self.soinn = Soinn()
+        self.soinn._reset_state()
         self.soinn.dim = 2  # dim have to be set before calling __add_node()
         signals = np.random.random((4, 2))
         for n in range(signals.shape[0]):
