@@ -3,6 +3,8 @@
 # http://opensource.org/licenses/mit-license.php
 
 import numpy as np
+from numpy import ndarray
+from numpy.linalg import det, eigvals, inv
 from soinn import Soinn
 
 
@@ -32,7 +34,7 @@ class KdeSoinn(Soinn):
         super()._reset_state()
         self.network_sigmas = []
 
-    def input_signal(self, signal: np.ndarray):
+    def input_signal(self, signal: ndarray):
         """
         Input a new signal one by one, which means training in online manner.
         fit() calls __init__() before training, which means resetting the
@@ -119,4 +121,51 @@ class KdeSoinn(Soinn):
             w = np.sqrt(sq_dists(2))
             M = self.threshold_coefficient * w * np.eye(self.dim)
         return M
+
+    @staticmethod
+    def _calculate_mahalanobis_distance(
+            target: ndarray, source: ndarray, cov_mat: ndarray) -> ndarray:
+        e = KdeSoinn._check_valid_matrix(cov_mat)
+        if e != ' ':
+            print(e)
+            cov_mat = KdeSoinn._modify_irregular_matrix(cov_mat)
+        dif = target - source
+        sq_dist = np.dot(np.dot(dif, inv(cov_mat)), dif)
+        return sq_dist
+
+    @staticmethod
+    def _modify_irregular_matrix(M: ndarray) -> ndarray:
+        tol = 1.0e-5
+        c_ = 0
+        while KdeSoinn._check_valid_matrix(M) != ' ':
+            M = M + tol * np.eye(*M.shape)
+            c_ = c_ + 1
+            print(c_)
+        return M
+
+    @staticmethod
+    def _check_valid_matrix(mat: ndarray) -> str:
+        """
+        Check a specific matrix is varid or not.
+        :param mat:
+        :return:
+            ' ' if the matrix is valid.
+            'n' if the matrix contains NaN.
+            'i' if the matrix contains infinity.
+            'z' if the matrix is a zero matrix.
+            'r' if the matrix is a regular matrix.
+            'p' if the matrix is a non-negative definite matrix.
+            ( positive definite matrix or positive semidefinite matrix).
+        """
+        if np.any(np.isnan(mat)):
+            return 'n'
+        if np.any(np.isinf(mat)):
+            return 'i'
+        if np.all(abs(mat) < 1.0e-6):
+            return 'z'
+        if abs(det(mat)) < 1.0e-6:
+            return 'r'
+        if np.any(eigvals(mat) < 0):
+            return 'p'
+        return ' '
 
