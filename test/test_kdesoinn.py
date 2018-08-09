@@ -85,6 +85,16 @@ class TestKdeSoinn(TestSoinn):
         self.assertEqual(sorted(self.soinn._get_pals(1)), [2, 3])
         self.assertEqual(self.soinn._get_pals(3), [1])
 
+    def test_get_connected_nodes(self):
+        self.soinn.adjacent_mat[0, :] = np.array([0, 0, 1, 1])
+        self.soinn.adjacent_mat[:, 0] = np.array([[0, 0, 1, 1]]).transpose()
+        self.soinn.adjacent_mat[1, 2] = 1
+        self.soinn.adjacent_mat[2, 1] = 1
+        actual = self.soinn._get_connected_nodes(begin_node_index=1, depth=1)
+        self.assertEqual([1, 2], actual)
+        actual = self.soinn._get_connected_nodes(begin_node_index=1, depth=2)
+        self.assertEqual([0, 1, 2], actual)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -170,6 +170,25 @@ class KdeSoinn(Soinn):
         return ' '
 
 
+    def _get_connected_nodes(self, begin_node_index: int, depth: int):
+        """
+        get nodes connected to the specific node.
+        :param begin_node_index: start searching from this node.
+        :param depth: how deeply to search. 1 or 2.
+
+        """
+        if depth not in [1, 2]:
+            return []
+        include_flags = np.zeros(self.nodes.shape[0])
+        include_flags[begin_node_index] = 1
+        pals = self._get_pals(begin_node_index)
+        include_flags[pals] = 1
+        if depth == 2:
+            for j in range(len(pals)):
+                pals_j = self._get_pals(pals[j])
+                include_flags[pals_j] = 1
+        return [i for i, v in enumerate(include_flags) if v > 0]
+
     def _get_pals(self, node_index: int) -> list:
         """
         Get adjacent nodes of a specific node
