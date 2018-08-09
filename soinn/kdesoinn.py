@@ -169,3 +169,12 @@ class KdeSoinn(Soinn):
             return 'p'
         return ' '
 
+
+    def _get_pals(self, node_index: int) -> list:
+        """
+        Get adjacent nodes of a specific node
+        :param node_index:
+        :return: 
+        """
+        return [i[0] for i in self.adjacent_mat.getcol(node_index).keys()]
+

@@ -79,6 +79,12 @@ class TestKdeSoinn(TestSoinn):
         M[2, 2] = -1
         self.assertEqual(KdeSoinn._check_valid_matrix(M), 'p')
 
+    def test_get_pals(self):
+        self.soinn.adjacent_mat[1, :] = np.array([0, 0, 1, 1])
+        self.soinn.adjacent_mat[:, 1] = np.array([[0, 0, 1, 1]]).transpose()
+        self.assertEqual(sorted(self.soinn._get_pals(1)), [2, 3])
+        self.assertEqual(self.soinn._get_pals(3), [1])
+
 
 if __name__ == '__main__':
     unittest.main()
