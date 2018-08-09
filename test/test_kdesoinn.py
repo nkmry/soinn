@@ -2,6 +2,7 @@ import unittest
 from numpy.testing import assert_array_equal
 from test_soinn import TestSoinn
 import numpy as np
+from numpy import ndarray
 from scipy.sparse import dok_matrix
 from kdesoinn import KdeSoinn
 
@@ -47,6 +48,21 @@ class TestKdeSoinn(TestSoinn):
         for i, v in zip(range(2), [0, 2]):
             assert_array_equal(self.soinn.network_sigmas[i],
                                np.array([[v, 0.], [0., 1.]]))
+
+    def test_calculate_mahalanobis_distance(self):
+        target = np.array([1, 0])
+        source = np.array([0, 0])
+        cov_mat = np.eye(2)
+        d = self.soinn._calculate_mahalanobis_distance(target, source, cov_mat)
+        self.assertEqual(d, 1.0)
+
+        cov_mat = np.array([[2, 0], [0, 1]])
+        d = self.soinn._calculate_mahalanobis_distance(target, source, cov_mat)
+        self.assertEqual(d, 0.5)
+
+        source = np.array([1, 1])
+        d = self.soinn._calculate_mahalanobis_distance(target, source, cov_mat)
+        self.assertEqual(d, 1.0)
 
 
 if __name__ == '__main__':
