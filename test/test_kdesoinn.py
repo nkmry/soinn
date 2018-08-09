@@ -64,6 +64,21 @@ class TestKdeSoinn(TestSoinn):
         d = self.soinn._calculate_mahalanobis_distance(target, source, cov_mat)
         self.assertEqual(d, 1.0)
 
+    def test_check_valid_matrix(self):
+        M = np.eye(3)
+        self.assertEqual(KdeSoinn._check_valid_matrix(M), ' ')
+        M[2, 1] = np.nan
+        self.assertEqual(KdeSoinn._check_valid_matrix(M), 'n')
+        M[2, 1] = np.inf
+        self.assertEqual(KdeSoinn._check_valid_matrix(M), 'i')
+        M = np.zeros(3)
+        self.assertEqual(KdeSoinn._check_valid_matrix(M), 'z')
+        M = np.ones((3, 3))
+        self.assertEqual(KdeSoinn._check_valid_matrix(M), 'r')
+        M = np.eye(3)
+        M[2, 2] = -1
+        self.assertEqual(KdeSoinn._check_valid_matrix(M), 'p')
+
 
 if __name__ == '__main__':
     unittest.main()
