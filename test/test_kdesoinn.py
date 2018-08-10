@@ -82,8 +82,8 @@ class TestKdeSoinn(TestSoinn):
     def test_get_pals(self):
         self.soinn.adjacent_mat[1, :] = np.array([0, 0, 1, 1])
         self.soinn.adjacent_mat[:, 1] = np.array([[0, 0, 1, 1]]).transpose()
-        self.assertEqual(sorted(self.soinn._get_pals(1)), [2, 3])
-        self.assertEqual(self.soinn._get_pals(3), [1])
+        self.assertEqual([2, 3], sorted(self.soinn._get_pals(1)))
+        self.assertEqual([1], self.soinn._get_pals(3))
 
     def test_get_connected_nodes(self):
         self.soinn.adjacent_mat[0, :] = np.array([0, 0, 1, 1])
@@ -99,10 +99,21 @@ class TestKdeSoinn(TestSoinn):
         self.soinn.adjacent_mat[0, :] = np.array([0, 0, 1, 1])
         self.soinn.adjacent_mat[:, 0] = np.array([[0, 0, 1, 1]]).transpose()
         self.soinn._update_network_sigma(0)
-        assert_array_equal(self.soinn.network_sigmas[0],
-                           np.array([[.5, .5], [.5, 1]]))
+        assert_array_equal(np.array([[.5, .5], [.5, 1]]),
+                           self.soinn.network_sigmas[0])
         self.soinn._update_network_sigma(1)
-        assert_array_equal(self.soinn.network_sigmas[1], np.zeros((2, 2)))
+        assert_array_equal(np.zeros((2, 2)), self.soinn.network_sigmas[1])
+
+    def test_update_network_sigmas(self):
+        self.soinn.adjacent_mat[0, :] = np.array([0, 0, 1, 1])
+        self.soinn.adjacent_mat[:, 0] = np.array([[0, 0, 1, 1]]).transpose()
+        self.soinn.adjacent_mat[1, :] = np.array([0, 0, 1, 0])
+        self.soinn.adjacent_mat[:, 1] = np.array([[0, 0, 1, 0]]).transpose()
+        self.soinn._update_network_sigmas(winner_index=0, connection_depth=2)
+        assert_array_equal(np.array([[.5, .5], [.5, 1]]),
+                           self.soinn.network_sigmas[0])
+        assert_array_equal(np.array([[0, 0], [0, 1]]),
+                           self.soinn.network_sigmas[1])
 
 
 if __name__ == '__main__':

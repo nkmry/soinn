@@ -59,7 +59,7 @@ class KdeSoinn(Soinn):
             self._increment_edge_ages(winners[1])
             winners[1] = self._delete_old_edges(winners[1])
             self._update_winner(winners[1], signal)
-            self.__update_network_sigmas(winners[1], 1)
+            self._update_network_sigmas(winners[1], 1)
 
         if self.num_signal % self.delete_node_period == 0:
             self._delete_noise_nodes()
@@ -169,6 +169,11 @@ class KdeSoinn(Soinn):
             return 'p'
         return ' '
 
+    def _update_network_sigmas(self, winner_index: int, connection_depth: int):
+        target_nodes = self._get_connected_nodes(winner_index,
+                                                 connection_depth)
+        for j in range(len(target_nodes)):
+            self._update_network_sigma(target_nodes[j])
 
     def _get_connected_nodes(self, begin_node_index: int, depth: int):
         """
@@ -197,7 +202,7 @@ class KdeSoinn(Soinn):
         """
         return [i[0] for i in self.adjacent_mat.getcol(node_index).keys()]
 
-    def _update_network_sigma(self, node_index: int) -> None:
+    def _update_network_sigma(self, node_index: int):
         """
         Update network covariance matrix of a specific node
         :param node_index: the index of the specific node
