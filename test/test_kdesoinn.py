@@ -95,6 +95,15 @@ class TestKdeSoinn(TestSoinn):
         actual = self.soinn._get_connected_nodes(begin_node_index=1, depth=2)
         self.assertEqual([0, 1, 2], actual)
 
+    def test_update_network_sigma(self):
+        self.soinn.adjacent_mat[0, :] = np.array([0, 0, 1, 1])
+        self.soinn.adjacent_mat[:, 0] = np.array([[0, 0, 1, 1]]).transpose()
+        self.soinn._update_network_sigma(0)
+        assert_array_equal(self.soinn.network_sigmas[0],
+                           np.array([[.5, .5], [.5, 1]]))
+        self.soinn._update_network_sigma(1)
+        assert_array_equal(self.soinn.network_sigmas[1], np.zeros((2, 2)))
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -197,3 +197,24 @@ class KdeSoinn(Soinn):
         """
         return [i[0] for i in self.adjacent_mat.getcol(node_index).keys()]
 
+    def _update_network_sigma(self, node_index: int) -> None:
+        """
+        Update network covariance matrix of a specific node
+        :param node_index: the index of the specific node
+        :return: 
+        """
+        pals = self._get_pals(node_index)
+        if len(pals) < 1:
+            self.network_sigmas[node_index] = np.zeros([self.dim] * 2)
+        else:
+            sigma = np.zeros([self.dim] * 2)
+            node = self.nodes[node_index, :]
+            difs = self.nodes[pals, :] - np.tile(node, (len(pals), 1))
+            w_sum = 0.0
+            for j in range(len(pals)):
+                w = self.winning_times[pals[j]]
+                d = difs[j, :]
+                w_sum += w
+                sigma += w * np.outer(d, d)
+            self.network_sigmas[node_index] = sigma / w_sum
+
