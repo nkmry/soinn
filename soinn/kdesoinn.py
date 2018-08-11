@@ -5,6 +5,7 @@
 import numpy as np
 from numpy import ndarray
 from numpy.linalg import det, eigvals, inv
+from scipy.sparse import dok_matrix
 from soinn import Soinn
 
 
@@ -223,3 +224,15 @@ class KdeSoinn(Soinn):
                 sigma += w * np.outer(d, d)
             self.network_sigmas[node_index] = sigma / w_sum
 
+
+    def _create_knn_graph(self, k: int) -> dok_matrix:
+        N = self.nodes.shape[0]
+        A = dok_matrix((N, N), dtype=np.int32)
+        for i in range(N):
+            neighbor_indexes, _ = self._find_nearest_nodes(k + 1,
+                                                           self.nodes[i, :])
+            for j in neighbor_indexes:
+                if j != i:
+                    A[i, j] = 1
+        A = A.multiply(A.transpose())
+        return A

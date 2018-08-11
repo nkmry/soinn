@@ -115,6 +115,16 @@ class TestKdeSoinn(TestSoinn):
         assert_array_equal(np.array([[0, 0], [0, 1]]),
                            self.soinn.network_sigmas[1])
 
+    def test_create_knn_graph(self):
+        self.soinn._add_node(np.array([-0.5, 0]))
+        expected = np.array([[0, 1, 0, 0, 1],
+                             [1, 0, 1, 0, 0],
+                             [0, 1, 0, 1, 0],
+                             [0, 0, 1, 0, 0],
+                             [1, 0, 0, 0, 0]])
+        actual = self.soinn._create_knn_graph(2).toarray()
+        assert_array_equal(expected, actual)
+
 
 if __name__ == '__main__':
     unittest.main()
