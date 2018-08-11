@@ -4,6 +4,7 @@
 
 from typing import overload
 import numpy as np
+from numpy import ndarray
 from scipy.sparse import dok_matrix
 from sklearn.base import BaseEstimator, ClusterMixin
 
@@ -53,18 +54,18 @@ class Soinn(BaseEstimator, ClusterMixin):
         self.labels_ = self._label_samples(X)
         return self
 
-    def fit_predict(self, X, y=None):
+    def fit_predict(self, X, y=None) -> ndarray:
         """
         train data and predict cluster index for each sample.
         :param X: array-like or ndarray
-        :rtype list:
+        :param y:
         :return:
             cluster index for each sample. if a sample is noise, its index is
             Soinn.NOISE_LABEL.
         """
         return self.fit(X).labels_
 
-    def input_signal(self, signal: np.ndarray):
+    def input_signal(self, signal: ndarray):
         """
         Input a new signal one by one, which means training in online manner.
         fit() calls __init__() before training, which means resetting the
@@ -94,9 +95,9 @@ class Soinn(BaseEstimator, ClusterMixin):
             self._delete_noise_nodes()
 
     @overload
-    def _check_signal(self, signal: list) -> None: ...
+    def _check_signal(self, signal: list) -> ndarray: ...
 
-    def _check_signal(self, signal: np.ndarray):
+    def _check_signal(self, signal: ndarray) -> ndarray:
         """
         check type and dimensionality of an input signal.
         If signal is the first input signal, set the dimension of it as
@@ -106,7 +107,7 @@ class Soinn(BaseEstimator, ClusterMixin):
         """
         if isinstance(signal, list):
             signal = np.array(signal)
-        if not(isinstance(signal, np.ndarray)):
+        if not(isinstance(signal, ndarray)):
             raise TypeError()
         if len(signal.shape) != 1:
             raise TypeError()
@@ -117,14 +118,14 @@ class Soinn(BaseEstimator, ClusterMixin):
                 raise TypeError()
         return signal
 
-    def _add_node(self, signal: np.ndarray):
+    def _add_node(self, signal: ndarray):
         n = self.nodes.shape[0]
         self.nodes.resize((n + 1, self.dim))
         self.nodes[-1, :] = signal
         self.winning_times.append(1)
         self.adjacent_mat.resize((n + 1, n + 1))
 
-    def _find_nearest_nodes(self, num: int, signal: np.ndarray):
+    def _find_nearest_nodes(self, num: int, signal: ndarray) -> (list, list):
         n = self.nodes.shape[0]
         indexes = [0] * num
         sq_dists = [0.0] * num
@@ -135,7 +136,7 @@ class Soinn(BaseEstimator, ClusterMixin):
             D[indexes[i]] = float('nan')
         return indexes, sq_dists
 
-    def _calculate_similarity_thresholds(self, node_indexes):
+    def _calculate_similarity_thresholds(self, node_indexes) -> list:
         sim_thresholds = []
         for i in node_indexes:
             pals = self.adjacent_mat[i, :]
@@ -146,7 +147,9 @@ class Soinn(BaseEstimator, ClusterMixin):
                 pal_indexes = []
                 for k in pals.keys():
                     pal_indexes.append(k[1])
-                sq_dists = np.sum((self.nodes[pal_indexes] - np.array([self.nodes[i] * len(pal_indexes)]))**2, 1)
+                diffs = self.nodes[pal_indexes] -\
+                        np.tile(self.nodes[i], (len(pal_indexes), 1))
+                sq_dists = np.sum(diffs**2, 1)
                 sim_thresholds.append(np.max(sq_dists))
         return sim_thresholds
 
@@ -157,7 +160,7 @@ class Soinn(BaseEstimator, ClusterMixin):
         for k, v in self.adjacent_mat[winner_index, :].items():
             self._set_edge_weight((winner_index, k[1]), v + 1)
 
-    def _delete_old_edges(self, winner_index):
+    def _delete_old_edges(self, winner_index: int) -> int:
         """
         :return: winner_index after deletion
         """
@@ -182,7 +185,8 @@ class Soinn(BaseEstimator, ClusterMixin):
     def _update_winner(self, winner_index, signal):
         self.winning_times[winner_index] += 1
         w = self.nodes[winner_index]
-        self.nodes[winner_index] = w + (signal - w)/self.winning_times[winner_index]
+        self.nodes[winner_index] =\
+            w + (signal - w) / self.winning_times[winner_index]
 
     def _update_adjacent_nodes(self, winner_index, signal):
         pals = self.adjacent_mat[winner_index]
@@ -216,7 +220,8 @@ class Soinn(BaseEstimator, ClusterMixin):
                     new_key2 = key2
                 #Because dok_matrix.__getitem__ is slow,
                 #access as dictionary.
-                next_adjacent_mat[new_key1, new_key2] = super(dok_matrix, self.adjacent_mat).__getitem__((key1, key2))
+                next_adjacent_mat[new_key1, new_key2] = super(
+                    dok_matrix, self.adjacent_mat).__getitem__((key1, key2))
             self.adjacent_mat = next_adjacent_mat.copy()
             indexes = [i-1 for i in indexes]
             indexes.pop(0)
@@ -232,7 +237,7 @@ class Soinn(BaseEstimator, ClusterMixin):
                 noise_indexes.append(i)
         self._delete_nodes(noise_indexes)
 
-    def _label_nodes(self, min_cluster_size=3):
+    def _label_nodes(self, min_cluster_size=3) -> ndarray:
         n = self.nodes.shape[0]
         labels = np.array([Soinn.NOISE_LABEL for _ in range(n)], dtype='i')
         current_label = 0
@@ -247,8 +252,8 @@ class Soinn(BaseEstimator, ClusterMixin):
         self.node_labels = labels
         return labels
 
-    def _label_cluster_nodes(self, labels: np.ndarray, first_node_index: int,
-                             cluster_label: int):
+    def _label_cluster_nodes(self, labels: ndarray, first_node_index: int,
+                             cluster_label: int) -> (ndarray, list):
         """
         label cluster nodes with breadth first search
         """
@@ -263,7 +268,7 @@ class Soinn(BaseEstimator, ClusterMixin):
                     self.adjacent_mat[idx, :].toarray() > 0)[1])
         return labels, labeled_indexes
 
-    def _label_samples(self, X: np.ndarray):
+    def _label_samples(self, X: ndarray) -> ndarray:
         """
         :param X: (n, d) matrix whose rows are samples.
         :rtype list:
