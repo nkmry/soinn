@@ -122,8 +122,20 @@ class TestKdeSoinn(TestSoinn):
                              [0, 1, 0, 1, 0],
                              [0, 0, 1, 0, 0],
                              [1, 0, 0, 0, 0]])
-        actual = self.soinn._create_knn_graph(2).toarray()
-        assert_array_equal(expected, actual)
+        actual = self.soinn._create_knn_graph(2)
+        self.assertTrue(isinstance(actual, dok_matrix))
+        assert_array_equal(expected, actual.toarray())
+
+    def test_adjust_network(self):
+        self.soinn.adjacent_mat[0, 1] = 2
+        self.soinn.adjacent_mat[1, 0] = 2
+        expected = np.array([[0, 2, 0, 1],
+                             [2, 0, 1, 0],
+                             [0, 1, 0, 1],
+                             [1, 0, 1, 0]], dtype=np.float64)
+        self.soinn.k = 2
+        self.soinn._adjust_network()
+        assert_array_equal(expected, self.soinn.adjacent_mat.toarray())
 
 
 if __name__ == '__main__':

@@ -64,7 +64,7 @@ class KdeSoinn(Soinn):
 
         if self.num_signal % self.delete_node_period == 0:
             self._delete_noise_nodes()
-            self.__adjust_network()
+            self._adjust_network()
 
     def _add_node(self, signal):
         super()._add_node(signal)
@@ -224,15 +224,24 @@ class KdeSoinn(Soinn):
                 sigma += w * np.outer(d, d)
             self.network_sigmas[node_index] = sigma / w_sum
 
+    def _adjust_network(self):
+        g = self._create_knn_graph(self.k)
+        for i in g.keys():
+            if i not in self.adjacent_mat.keys():
+                self.adjacent_mat[i] = 1
+        updated_indexes = list({i[0] for i in g.keys()})
+        for i in updated_indexes:
+            self._update_network_sigma(i)
 
     def _create_knn_graph(self, k: int) -> dok_matrix:
-        N = self.nodes.shape[0]
-        A = dok_matrix((N, N), dtype=np.int32)
-        for i in range(N):
+        n = self.nodes.shape[0]
+        A = dok_matrix((n, n), dtype=np.int32)
+        for i in range(n):
             neighbor_indexes, _ = self._find_nearest_nodes(k + 1,
                                                            self.nodes[i, :])
             for j in neighbor_indexes:
                 if j != i:
                     A[i, j] = 1
-        A = A.multiply(A.transpose())
+        # only remain bidirected edges
+        A = A.multiply(A.transpose()).todok()
         return A
